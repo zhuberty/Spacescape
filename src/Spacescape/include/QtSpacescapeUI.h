@@ -417,10 +417,13 @@ public:
         menuBar->setNativeMenuBar(true);
 
         mProgressDialog = new QProgressDialog(MainWindow);
+        mProgressDialog->setWindowTitle("Spacescape");
+        mProgressDialog->setLabelText("Loading...");
         mProgressDialog->setMinimum(0);
         mProgressDialog->setMaximum(100);
         mProgressDialog->setWindowModality(Qt::WindowModal);
         mProgressDialog->setCancelButton(0);
+        mProgressDialog->reset(); // prevent Qt's auto-show timer from firing at startup
 
         retranslateUi(MainWindow);
         QObject::connect(actionE_xit, SIGNAL(triggered()), MainWindow, SLOT(close()));

@@ -3,12 +3,23 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/src/SpacescapePlugin/include",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/libs/Qt/5.12.8/msvc2017_64/include",
+                "${workspaceFolder}/libs/Qt/5.12.8/msvc2017_64/include/QtCore",
+                "${workspaceFolder}/libs/Qt/5.12.8/msvc2017_64/include/QtGui",
+                "${workspaceFolder}/libs/Qt/5.12.8/msvc2017_64/include/QtWidgets",
+                "${workspaceFolder}/libs/Qt/5.12.8/msvc2017_64/include/QtOpenGL",
+                "${workspaceFolder}/libs/Qt/5.12.8/msvc2017_64/include/QtXml",
+                "${workspaceFolder}/libs/Qt/5.12.8/msvc2017_64/include/QtSvg",
+                "${workspaceFolder}/build/vcpkg_installed/x64-windows/include",
+                "${workspaceFolder}/build/src/Spacescape/Spacescape_autogen/include_Release"
             ],
             "defines": [
                 "TIXML_USE_TICPP",
-                "OGRE_SPACESCAPEPLUGIN_EXPORTS"
+                "OGRE_SPACESCAPEPLUGIN_EXPORTS",
+                "_WIN64",
+                "WIN32",
+                "NDEBUG"
             ],
             "compilerPath": "cl.exe",
             "cStandard": "c17",
