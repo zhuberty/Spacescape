@@ -29,7 +29,19 @@ THE SOFTWARE.
 */
 #include <QApplication>
 #include <QDir>
+#include <QFile>
+#include <QTextStream>
+#include <QDateTime>
+#include <QCoreApplication>
 #include "QtSpacescapeMainWindow.h"
+
+// Write a line to startup.log (next to the exe) so it's visible even on early crash
+static void startupLog(const QString& msg) {
+    QFile f(QApplication::applicationDirPath() + "/startup.log");
+    f.open(QIODevice::Append | QIODevice::Text);
+    QTextStream ts(&f);
+    ts << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << "  " << msg << "\n";
+}
 
 int main(int argc, char *argv[]) {
 #ifdef Q_OS_MAC
@@ -42,8 +54,35 @@ int main(int argc, char *argv[]) {
 #endif
 
     QApplication app(argc, argv);
+
+    // Clear previous log and write initial diagnostics
+    {
+        QFile f(QApplication::applicationDirPath() + "/startup.log");
+        f.open(QIODevice::WriteOnly | QIODevice::Text); // truncate
+    }
+    startupLog("=== Spacescape startup ===");
+    startupLog("applicationDirPath : " + QApplication::applicationDirPath());
+    startupLog("CWD at entry       : " + QDir::currentPath());
+    startupLog("Qt library paths   : " + QApplication::libraryPaths().join("; "));
+
+    // Log Qt runtime DLL versions by checking file timestamps of known DLLs
+#ifdef Q_OS_WIN
+    QString appDir = QApplication::applicationDirPath();
+    for (const QString& dll : QStringList{"Qt5Core.dll", "Qt5Gui.dll", "Qt5Widgets.dll", "Qt5Svg.dll"}) {
+        QFileInfo fi(appDir + "/" + dll);
+        if (fi.exists())
+            startupLog(dll + " last modified: " + fi.lastModified().toString(Qt::ISODate)
+                       + "  size: " + QString::number(fi.size()) + " bytes");
+        else
+            startupLog(dll + " : NOT FOUND");
+    }
+#endif
+
+    startupLog("--- Creating main window ---");
+
     QtSpacescapeMainWindow w;
     w.show();
 
+    startupLog("--- Entering event loop ---");
     return app.exec();
 }

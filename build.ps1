@@ -246,7 +246,15 @@ Write-Step "Deploying Qt runtime DLLs..."
 $spacescapeExe = Join-Path $InstallDir "Spacescape.exe"
 $windeployqt   = Join-Path $QtPrefixPath "bin\windeployqt.exe"
 if ((Test-Path $windeployqt) -and (Test-Path $spacescapeExe)) {
+    # windeployqt may warn about VCINSTALLDIR and exit non-zero — that's harmless.
+    # Temporarily suppress Stop so we can handle the exit code ourselves.
+    $prev = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
     & $windeployqt --no-translations --no-angle --no-opengl-sw $spacescapeExe
+    $wdqExit = $LASTEXITCODE
+    $ErrorActionPreference = $prev
+    if ($wdqExit -ne 0) {
+        Write-Host "  WARNING: windeployqt exited with code $wdqExit (non-fatal, continuing...)" -ForegroundColor Yellow
+    }
 } else {
     Write-Host "  WARNING: skipping windeployqt (exe or tool not found)" -ForegroundColor Yellow
 }

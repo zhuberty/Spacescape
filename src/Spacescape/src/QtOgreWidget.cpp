@@ -38,6 +38,18 @@ THE SOFTWARE.
 #endif
 
 #include <QDir>
+#include <QFile>
+#include <QTextStream>
+#include <QDateTime>
+#include <QFileInfo>
+
+// Append a diagnostic line to startup.log
+static void ogreWidgetLog(const QString& msg) {
+    QFile f(QApplication::applicationDirPath() + "/startup.log");
+    f.open(QIODevice::Append | QIODevice::Text);
+    QTextStream ts(&f);
+    ts << QDateTime::currentDateTime().toString("hh:mm:ss.zzz") << "  [OgreWidget] " << msg << "\n";
+}
 
 Ogre::Root * QtOgreWidget::mOgreRoot = NULL;
 
@@ -64,31 +76,45 @@ QtOgreWidget::~QtOgreWidget(void) {
 void QtOgreWidget::configure(void) {
 	if (mOgreRoot)
 		return;
+
+	ogreWidgetLog("configure() entered");
+	ogreWidgetLog("CWD before setCurrent : " + QDir::currentPath());
+	ogreWidgetLog("applicationDirPath    : " + QApplication::applicationDirPath());
 	
 #ifdef WIN32
-	// set the current working directory to the path where the
-	// executable resides
+	// Set the CWD to the directory containing the executable (i.e. dist/).
+	// Config files (plugins.cfg, app.cfg, resources.cfg) are looked up as
+	// "../plugins.cfg" etc., which resolves one level above CWD — the repo root —
+	// where build.ps1 generates them with absolute PluginFolder paths.
 	QString path = QApplication::applicationDirPath();
-
-	if(!path.contains("app/win",Qt::CaseInsensitive)) {
-		path += "/app/win/release";
-	}
-
-	//MessageBox(NULL, path.toStdString().c_str(), "App Path", MB_OK);
-
 	QDir::setCurrent(path.toStdString().c_str());
+	ogreWidgetLog("CWD set to exe dir    : " + QDir::currentPath());
 #endif
 
 #if defined(Q_OS_UNIX)
+	ogreWidgetLog("Creating Ogre::Root with plugins.cfg / app.cfg / app.log (UNIX)");
         mOgreRoot = new Ogre::Root("plugins.cfg", "app.cfg", "app.log");
 #else
     #ifdef _DEBUG
+	ogreWidgetLog("Creating Ogre::Root with ../plugins_d.cfg / ../app.cfg / ../app.log (Win DEBUG)");
+	{
+		QFileInfo pf(QDir::currentPath() + "/../plugins_d.cfg");
+		ogreWidgetLog("  plugins_d.cfg exists: " + QString(pf.exists() ? "YES" : "NO") + "  path: " + pf.absoluteFilePath());
+	}
     mOgreRoot = new Ogre::Root(
         QString("../plugins_d.cfg").toStdString(), 
         QString("../app.cfg").toStdString(), 
         QString("../app.log").toStdString()
     );
     #else
+	ogreWidgetLog("Creating Ogre::Root with ../plugins.cfg / ../app.cfg / ../app.log (Win Release)");
+	{
+		QString resolvedPlugins = QDir(QDir::currentPath()).filePath("../plugins.cfg");
+		QFileInfo pf(resolvedPlugins);
+		ogreWidgetLog("  plugins.cfg exists: " + QString(pf.exists() ? "YES" : "NO") + "  path: " + pf.absoluteFilePath());
+		QFileInfo af(QDir(QDir::currentPath()).filePath("../app.cfg"));
+		ogreWidgetLog("  app.cfg exists    : " + QString(af.exists() ? "YES" : "NO") + "  path: " + af.absoluteFilePath());
+	}
     mOgreRoot = new Ogre::Root(
         QString("../plugins.cfg").toStdString(), 
         QString("../app.cfg").toStdString(), 
@@ -96,6 +122,7 @@ void QtOgreWidget::configure(void) {
     );
     #endif
 #endif
+	ogreWidgetLog("Ogre::Root created successfully - plugins loaded");
 	if (!mOgreRoot->restoreConfig()) {
         Ogre::RenderSystem *renderSystem = mOgreRoot->getRenderSystemByName("OpenGL Rendering Subsystem");
         OgreAssert(renderSystem, "OpenGL RenderSystem must be available");
@@ -109,6 +136,7 @@ void QtOgreWidget::configure(void) {
 		mOgreRoot->saveConfig();
 	}
 	mOgreRoot->initialise(false);
+	ogreWidgetLog("Ogre::Root::initialise(false) completed - render system ready");
 }
 
 /** Create the Ogre render window
