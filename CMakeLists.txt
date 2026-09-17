@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5...3.31)
 
 set(SPC_VERSION_MAJOR 0)
 set(SPC_VERSION_MINOR 7)

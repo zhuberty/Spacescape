@@ -10,7 +10,12 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build/
-
+dist/
+vcpkg/
+vcpkg.json
+vcpkg-configuration.json
+libs/Qt/
+libs/Ogre/
 
 .idea/
 .vs/

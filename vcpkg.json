@@ -1,0 +1,12 @@
+﻿{
+  "name": "spacescape",
+  "version": "0.7.0",
+  "dependencies": [
+    "freetype",
+    { "name": "ogre", "default-features": false, "features": ["assimp", "freeimage", "zziplib"] }
+  ],
+  "overrides": [
+    { "name": "ogre", "version": "1.12.9", "port-version": 10 }
+  ],
+  "builtin-baseline": "386d7c478221b7ee0c97bfe6ea61dcf65121d564"
+}
