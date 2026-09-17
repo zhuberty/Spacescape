@@ -20,3 +20,5 @@ libs/Ogre/
 .idea/
 .vs/
 .vscode/.
+
+*.log
