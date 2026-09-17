@@ -22,3 +22,4 @@ libs/Ogre/
 .vscode/.
 
 *.log
+build_output.txt
