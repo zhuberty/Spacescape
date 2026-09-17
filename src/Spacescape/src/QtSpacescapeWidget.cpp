@@ -47,6 +47,8 @@ QtSpacescapeWidget::QtSpacescapeWidget(QWidget *parent) : QtOgreWidget(parent,0)
     mTimer(0) {
 	mSceneMgr = NULL;
 	mViewPort = NULL;
+	mCamera = NULL;
+	mCameraNode = NULL;
 	mMousePressed = false;
 }
 
@@ -414,11 +416,12 @@ void QtSpacescapeWidget::setupResources(void) {
 void QtSpacescapeWidget::setupScene(void) {
 	mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
+	// Create the camera first, then attach it to the node
+	mCamera = mSceneMgr->createCamera("PlayerCam");
+
     mCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
     mCameraNode->attachObject(mCamera);
 	
-	// Create the camera
-	mCamera = mSceneMgr->createCamera("PlayerCam");
     mCameraNode->setPosition(Ogre::Vector3(0, 0, 0));
     mCamera->setNearClipDistance(0.1f);
     mCamera->setFarClipDistance(10000.0f);

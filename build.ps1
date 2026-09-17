@@ -262,7 +262,8 @@ if (-not (Test-Path $OgreBin)) {
     $OgreBin = Join-Path $VcpkgDir "installed\x64-windows\bin"
 }
 if (Test-Path $OgreBin) {
-    Get-ChildItem $OgreBin -Filter "*.dll" -File | Where-Object { $_.Name -like "Ogre*" -or $_.Name -like "Plugin*" -or $_.Name -like "RenderSystem*" } | ForEach-Object {
+    # Copy ALL DLLs (Ogre plugins + their dependencies like freetype, libpng, zlib, etc.)
+    Get-ChildItem $OgreBin -Filter "*.dll" -File | ForEach-Object {
         Copy-Item $_.FullName -Destination $InstallDir -Force
         Write-Host "  $($_.Name)"
     }
@@ -284,6 +285,44 @@ foreach ($sub in @("media","save")) {
     $src = Join-Path $RepoRoot "share\$sub"
     if (Test-Path $src) { Copy-Item $src -Destination $InstallDir -Recurse -Force }
 }
+
+# ---------------------------------------------------------------------------
+# 11. Create plugins.cfg at repo root (app looks for ../plugins.cfg from dist/)
+# ---------------------------------------------------------------------------
+Write-Step "Creating plugins.cfg..."
+$pluginsCfg = Join-Path $RepoRoot "plugins.cfg"
+$distAbsPath = $InstallDir.Replace('\', '\\')
+Set-Content $pluginsCfg @"
+# Defines plugins to load
+# PluginFolder uses absolute path because the app's CWD is dist/ but
+# plugins.cfg is resolved from dist/../plugins.cfg (the repo root).
+PluginFolder=$InstallDir
+
+# Define plugins
+Plugin=RenderSystem_GL
+Plugin=RenderSystem_GL3Plus
+Plugin=RenderSystem_Direct3D11
+Plugin=Plugin_ParticleFX
+Plugin=Plugin_BSPSceneManager
+Plugin=Plugin_PCZSceneManager
+Plugin=Plugin_OctreeZone
+Plugin=Plugin_OctreeSceneManager
+Plugin=Plugin_DotScene
+Plugin=Plugin_Spacescape
+Plugin=Codec_STBI
+"@
+Write-Host "  $pluginsCfg"
+
+# Also create resources.cfg at repo root (app looks for ../resources.cfg from dist/)
+$resourcesCfg = Join-Path $RepoRoot "resources.cfg"
+Set-Content $resourcesCfg @"
+# Resource locations to be added to the default path
+# Paths are relative to the app CWD (dist/)
+[General]
+FileSystem=media
+FileSystem=media/materials/textures
+"@
+Write-Host "  $resourcesCfg"
 
 # ---------------------------------------------------------------------------
 # Done

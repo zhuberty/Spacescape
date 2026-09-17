@@ -508,6 +508,9 @@ namespace Ogre
         // rtt to the given texture
         mPlugin->_rtt(texture,(uint)texture->getNumMipmaps());
 
+        // detach the manual object before destroying the node
+        node->detachObject(mRTTManualObject);
+
         // remove the scene node we just created
         mPlugin->getSceneNode()->getParentSceneNode()->removeAndDestroyChild("SpacescapeRttNoise");
 

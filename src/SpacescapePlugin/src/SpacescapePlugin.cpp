@@ -807,7 +807,7 @@ namespace Ogre
         
         // get the rtt camera
         Camera* rttCam;
-        if(!mgr->hasCamera("RTTCam")) {
+        if(!mgr->hasCamera("RttCam")) {
             rttCam = mgr->createCamera("RttCam");
 
             // initialize the camera
@@ -909,7 +909,7 @@ namespace Ogre
         }
         texture->load();
 
-        mSceneNode->detachObject(rttCam);
+        CamSceneNode->detachObject(rttCam);
         mgr->destroyCamera(rttCam);
 
         return true;

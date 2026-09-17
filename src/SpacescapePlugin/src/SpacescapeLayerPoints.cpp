@@ -216,9 +216,9 @@ namespace Ogre
             Real rU = rand() / ((double) RAND_MAX);
             Real rV = rand() / ((double) RAND_MAX);
 
-            // scale u,v to 0..maskSize
-            uint u = std::min<uint>(rU * maskSize,maskSize);
-            uint v = std::min<uint>(rV * maskSize,maskSize);
+            // scale u,v to 0..maskSize-1 (must not equal maskSize or buffer overrun occurs)
+            uint u = std::min<uint>((uint)(rU * maskSize), maskSize - 1);
+            uint v = std::min<uint>((uint)(rV * maskSize), maskSize - 1);
 
             // pick a random face
             uchar face = rand() % 6;
